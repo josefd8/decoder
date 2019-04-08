@@ -4,7 +4,7 @@ sudo: false
 services:
   - docker
   
-before_install:
+before_script:
   - sudo /etc/init.d/mysql stop
   - sudo /etc/init.d/postgresql stop
   - docker-compose up -d
@@ -22,3 +22,6 @@ jobs:
 branches:
   only:
   - master
+  
+after_script:
+  - docker-compose down
