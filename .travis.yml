@@ -12,16 +12,37 @@ before_script:
 cache:
   directories:
   - $HOME/.m2
+  
+stages:
+  - clean
+  - test
+  - integration
+  - name: deploy
+    if: branch = master
 
 jobs:
   include:
+  
+  - stage: clean
+    name: "Clean workspace"
+    script: mvn clean
+    
   - stage: test
+    name: "Tesing in Java 8"
     jdk: oraclejdk8
     script: mvn clean install -Dmaven.test.skip=true
+  - jdk: openjdk10
+    name: "Tesing in Java 10"
+    script: mvn clean install -Dmaven.test.skip=true
+  - jdk: openjdk11
+    name: "Tesing in Java 11"
+    script: mvn clean install -Dmaven.test.skip=true
+    
+  - stage: integration
+    name: "Integration tests"
+    jdk: oraclejdk8
+    script: mvn clean install -DVERSION=1.0 -DSLEEPTEST=3 -DAGENT_LIST=1,2 -DVARNAME=foo -DPOSTGRES_HOST=postgres -DMYSQL_HOST=mysql -DREST_SERVER_HOST=rest-server -DDEMO_SITE_HOST=demo-site -DSELENIUM_GRID=selenium-grid:4444 -DZOOKEEPER_HOST=kafka -DSCHEMA_REGISTRY_HOST=kafka
 
-branches:
-  only:
-  - master
   
 after_script:
   - docker-compose down
