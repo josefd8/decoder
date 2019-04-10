@@ -3,11 +3,6 @@ sudo: false
 
 services:
   - docker
-  
-before_script:
-  - sudo /etc/init.d/mysql stop
-  - sudo /etc/init.d/postgresql stop
-  - docker-compose up -d
 
 cache:
   directories:
@@ -41,8 +36,8 @@ jobs:
   - stage: integration
     name: "Integration tests"
     jdk: oraclejdk8
+    script: sudo /etc/init.d/mysql stop
+    script: sudo /etc/init.d/postgresql stop
+    script: docker-compose up -d
     script: mvn clean install -DVERSION=1.0 -DSLEEPTEST=3 -DAGENT_LIST=1,2 -DVARNAME=foo -DPOSTGRES_HOST=postgres -DMYSQL_HOST=mysql -DREST_SERVER_HOST=rest-server -DDEMO_SITE_HOST=demo-site -DSELENIUM_GRID=selenium-grid:4444 -DZOOKEEPER_HOST=kafka -DSCHEMA_REGISTRY_HOST=kafka
-
-  
-after_script:
-  - docker-compose down
+    script: docker-compose down
